@@ -77,12 +77,12 @@ RCT_EXPORT_METHOD(reportUserProfile:(NSDictionary *)attributes) {
             if (attributes[key] == [NSNull null]) {
                 [attrsArray addObject:[[YMMProfileAttribute birthDate] withValueReset]];
             } else if ([attributes[key] isKindOfClass:[NSArray class]]) {
-                NSArray *date = [attributes[key] array];
+                NSArray *date = attributes[key];
                 if ([date count] == 1) {
                     [attrsArray addObject:[[YMMProfileAttribute birthDate] withYear:[[date objectAtIndex:0] intValue]]];
-                } else if ([[attributes[key] array] count] == 2) {
+                } else if ([date count] == 2) {
                     [attrsArray addObject:[[YMMProfileAttribute birthDate] withYear:[[date objectAtIndex:0] intValue] month:[[date objectAtIndex:1] intValue]]];
-                } else if ([[attributes[key] array] count] == 3) {
+                } else if ([date count] == 3) {
                     [attrsArray addObject:[[YMMProfileAttribute birthDate] withYear:[[date objectAtIndex:0] intValue] month:[[date objectAtIndex:1] intValue] day:[[date objectAtIndex:2] intValue]]];
                 }
             } else {
