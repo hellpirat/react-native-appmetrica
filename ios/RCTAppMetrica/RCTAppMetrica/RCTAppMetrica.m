@@ -55,13 +55,17 @@ RCT_EXPORT_METHOD(reportUserProfile:(NSDictionary *)attributes) {
                 [attrsArray addObject:[[YMMProfileAttribute name] withValue:[attributes[key] stringValue]]];
             }
         } else if ([key isEqual: @"gender"]) {
-            NSString *value = attributes[key];
-            if ([value isEqualToString:@"female"]) {
-                [attrsArray addObject:[[YMMProfileAttribute gender] withValue:(YMMGenderType)YMMGenderTypeFemale]];
-            } else if ([value isEqualToString:@"male"]) {
-                [attrsArray addObject:[[YMMProfileAttribute gender] withValue:(YMMGenderType)YMMGenderTypeMale]];
+            if (attributes[key] == [NSNull null]) {
+                [attrsArray addObject:[[YMMProfileAttribute gender] withValueReset]];
             } else {
-                [attrsArray addObject:[[YMMProfileAttribute gender] withValue:(YMMGenderType)YMMGenderTypeOther]];
+                NSString *value = attributes[key];
+                if ([value isEqualToString:@"female"]) {
+                    [attrsArray addObject:[[YMMProfileAttribute gender] withValue:(YMMGenderType)YMMGenderTypeFemale]];
+                } else if ([value isEqualToString:@"male"]) {
+                    [attrsArray addObject:[[YMMProfileAttribute gender] withValue:(YMMGenderType)YMMGenderTypeMale]];
+                } else {
+                    [attrsArray addObject:[[YMMProfileAttribute gender] withValue:(YMMGenderType)YMMGenderTypeOther]];
+                }
             }
         } else if ([key isEqual: @"age"]) {
             if (attributes[key] == [NSNull null]) {
