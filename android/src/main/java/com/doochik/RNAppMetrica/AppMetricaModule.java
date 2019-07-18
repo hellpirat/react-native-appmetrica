@@ -3,7 +3,6 @@ package com.doochik.RNAppMetrica;
 import android.app.Activity;
 import android.app.Application;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
@@ -12,11 +11,8 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
 
-import java.lang.Exception;
 import java.util.Calendar;
 import java.util.Date;
-
-import org.json.JSONObject;
 
 import com.yandex.metrica.YandexMetrica;
 import com.yandex.metrica.YandexMetricaConfig;
@@ -85,7 +81,7 @@ public class AppMetricaModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void reportEvent(String message, @Nullable ReadableMap params) {
         if (params != null) {
-            YandexMetrica.reportEvent(message, convertReadableMapToJson(params));
+            YandexMetrica.reportEvent(message, MapUtil.toMap(params));
         } else {
             YandexMetrica.reportEvent(message);
         }
@@ -108,59 +104,59 @@ public class AppMetricaModule extends ReactContextBaseJavaModule {
                 // predefined attributes
                 case NAME:
                     userProfileBuilder.apply(
-                      params.isNull(key)
-                        ? Attribute.name().withValueReset()
-                        : Attribute.name().withValue(params.getString(key))
+                            params.isNull(key)
+                                    ? Attribute.name().withValueReset()
+                                    : Attribute.name().withValue(params.getString(key))
                     );
                     break;
                 case GENDER:
                     userProfileBuilder.apply(
-                      params.isNull(key)
-                        ? Attribute.gender().withValueReset()
-                        : Attribute.gender().withValue(
-                            params.getString(key).equals("female")
-                              ? GenderAttribute.Gender.FEMALE
-                              : params.getString(key).equals("male")
-                                ? GenderAttribute.Gender.MALE
-                                : GenderAttribute.Gender.OTHER
-                          )
+                            params.isNull(key)
+                                    ? Attribute.gender().withValueReset()
+                                    : Attribute.gender().withValue(
+                                    params.getString(key).equals("female")
+                                            ? GenderAttribute.Gender.FEMALE
+                                            : params.getString(key).equals("male")
+                                            ? GenderAttribute.Gender.MALE
+                                            : GenderAttribute.Gender.OTHER
+                            )
                     );
                     break;
                 case AGE:
                     userProfileBuilder.apply(
-                      params.isNull(key)
-                        ? Attribute.birthDate().withValueReset()
-                        : Attribute.birthDate().withAge(params.getInt(key))
+                            params.isNull(key)
+                                    ? Attribute.birthDate().withValueReset()
+                                    : Attribute.birthDate().withAge(params.getInt(key))
                     );
                     break;
                 case BIRTH_DATE:
                     if (params.isNull(key)) {
                         userProfileBuilder.apply(
-                          Attribute.birthDate().withValueReset()
+                                Attribute.birthDate().withValueReset()
                         );
                     } else if (params.getType(key) == Array) {
                         // an array of [ year[, month][, day] ]
                         ReadableArray date = params.getArray(key);
                         if (date.size() == 1) {
                             userProfileBuilder.apply(
-                              Attribute.birthDate().withBirthDate(
-                                date.getInt(0)
-                              )
+                                    Attribute.birthDate().withBirthDate(
+                                            date.getInt(0)
+                                    )
                             );
                         } else if (date.size() == 2) {
                             userProfileBuilder.apply(
-                              Attribute.birthDate().withBirthDate(
-                                date.getInt(0),
-                                date.getInt(1)
-                              )
+                                    Attribute.birthDate().withBirthDate(
+                                            date.getInt(0),
+                                            date.getInt(1)
+                                    )
                             );
                         } else {
                             userProfileBuilder.apply(
-                              Attribute.birthDate().withBirthDate(
-                                date.getInt(0),
-                                date.getInt(1),
-                                date.getInt(2)
-                              )
+                                    Attribute.birthDate().withBirthDate(
+                                            date.getInt(0),
+                                            date.getInt(1),
+                                            date.getInt(2)
+                                    )
                             );
                         }
                     } else {
@@ -169,15 +165,15 @@ public class AppMetricaModule extends ReactContextBaseJavaModule {
                         Calendar cal = Calendar.getInstance();
                         cal.setTime(date);
                         userProfileBuilder.apply(
-                          Attribute.birthDate().withBirthDate(cal)
+                                Attribute.birthDate().withBirthDate(cal)
                         );
                     }
                     break;
                 case NOTIFICATIONS_ENABLED:
                     userProfileBuilder.apply(
-                      params.isNull(key)
-                        ? Attribute.notificationsEnabled().withValueReset()
-                        : Attribute.notificationsEnabled().withValue(params.getBoolean(key))
+                            params.isNull(key)
+                                    ? Attribute.notificationsEnabled().withValueReset()
+                                    : Attribute.notificationsEnabled().withValue(params.getBoolean(key))
                     );
                     break;
                 // custom attributes
@@ -186,23 +182,23 @@ public class AppMetricaModule extends ReactContextBaseJavaModule {
                     switch (params.getType(key)) {
                         case Boolean:
                             userProfileBuilder.apply(
-                              Attribute.customBoolean(key).withValue(params.getBoolean(key))
+                                    Attribute.customBoolean(key).withValue(params.getBoolean(key))
                             );
                             break;
                         case Number:
                             userProfileBuilder.apply(
-                              Attribute.customNumber(key).withValue(params.getDouble(key))
+                                    Attribute.customNumber(key).withValue(params.getDouble(key))
                             );
                             break;
                         case String:
                             String value = params.getString(key);
                             if (value.startsWith("+") || value.startsWith("-")) {
                                 userProfileBuilder.apply(
-                                  Attribute.customCounter(key).withDelta(Double.parseDouble(value))
+                                        Attribute.customCounter(key).withDelta(Double.parseDouble(value))
                                 );
                             } else {
                                 userProfileBuilder.apply(
-                                  Attribute.customString(key).withValue(value)
+                                        Attribute.customString(key).withValue(value)
                                 );
                             }
                             break;
@@ -211,43 +207,5 @@ public class AppMetricaModule extends ReactContextBaseJavaModule {
         }
 
         YandexMetrica.reportUserProfile(userProfileBuilder.build());
-    }
-
-    private String convertReadableMapToJson(final ReadableMap readableMap) {
-        ReadableMapKeySetIterator iterator = readableMap.keySetIterator();
-        JSONObject json = new JSONObject();
-
-        try {
-            while (iterator.hasNextKey()) {
-                String key = iterator.nextKey();
-
-                switch (readableMap.getType(key)) {
-                    case Null:
-                        json.put(key, null);
-                        break;
-                    case Boolean:
-                        json.put(key, readableMap.getBoolean(key));
-                        break;
-                    case Number:
-                        json.put(key, readableMap.getDouble(key));
-                        break;
-                    case String:
-                        json.put(key, readableMap.getString(key));
-                        break;
-                    case Array:
-                        json.put(key, readableMap.getArray(key));
-                        break;
-                    case Map:
-                        json.put(key, convertReadableMapToJson(readableMap.getMap(key)));
-                        break;
-                    default:
-                        break;
-                }
-            }
-        } catch (Exception ex) {
-            Log.d(ModuleName, "convertReadableMapToJson fail: " + ex);
-        }
-
-        return json.toString();
     }
 }
