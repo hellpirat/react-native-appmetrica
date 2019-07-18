@@ -27,7 +27,13 @@ import com.yandex.metrica.profile.GenderAttribute;
 import static com.facebook.react.bridge.ReadableType.Array;
 
 public class AppMetricaModule extends ReactContextBaseJavaModule {
-    final static String ModuleName = "AppMetrica";
+    final static String MODULE_NAME = "AppMetrica";
+    final static String API_KEY = "apiKey";
+    final static String NAME = "name";
+    final static String AGE = "age";
+    final static String BIRTH_DATE = "birthDate";
+    final static String GENDER = "gender";
+    final static String NOTIFICATIONS_ENABLED = "notificationsEnabled";
 
     public AppMetricaModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -35,7 +41,7 @@ public class AppMetricaModule extends ReactContextBaseJavaModule {
 
     @Override
     public String getName() {
-        return ModuleName;
+        return MODULE_NAME;
     }
 
 
@@ -52,7 +58,7 @@ public class AppMetricaModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void activateWithConfig(ReadableMap params) {
-        YandexMetricaConfig.Builder configBuilder = YandexMetricaConfig.newConfigBuilder(params.getString("apiKey"));
+        YandexMetricaConfig.Builder configBuilder = YandexMetricaConfig.newConfigBuilder(params.getString(API_KEY));
         if (params.hasKey("sessionTimeout")) {
             configBuilder.withSessionTimeout(params.getInt("sessionTimeout"));
         }
@@ -100,14 +106,14 @@ public class AppMetricaModule extends ReactContextBaseJavaModule {
 
             switch (key) {
                 // predefined attributes
-                case "name":
+                case NAME:
                     userProfileBuilder.apply(
                       params.isNull(key)
                         ? Attribute.name().withValueReset()
                         : Attribute.name().withValue(params.getString(key))
                     );
                     break;
-                case "gender":
+                case GENDER:
                     userProfileBuilder.apply(
                       params.isNull(key)
                         ? Attribute.gender().withValueReset()
@@ -120,14 +126,14 @@ public class AppMetricaModule extends ReactContextBaseJavaModule {
                           )
                     );
                     break;
-                case "age":
+                case AGE:
                     userProfileBuilder.apply(
                       params.isNull(key)
                         ? Attribute.birthDate().withValueReset()
                         : Attribute.birthDate().withAge(params.getInt(key))
                     );
                     break;
-                case "birthDate":
+                case BIRTH_DATE:
                     if (params.isNull(key)) {
                         userProfileBuilder.apply(
                           Attribute.birthDate().withValueReset()
@@ -167,7 +173,7 @@ public class AppMetricaModule extends ReactContextBaseJavaModule {
                         );
                     }
                     break;
-                case "notificationsEnabled":
+                case NOTIFICATIONS_ENABLED:
                     userProfileBuilder.apply(
                       params.isNull(key)
                         ? Attribute.notificationsEnabled().withValueReset()
